@@ -1,0 +1,60 @@
+name: PharmaSupplyNetwork
+version: 2.4.1
+
+channels:
+  - name: medication-channel
+    configPolicy:
+      readers:
+        rule: "OR('ManufacturerMSP.member', 'DistributorMSP.member', 'RegulatorMSP.member')"
+      writers:
+        rule: "OR('ManufacturerMSP.member', 'DistributorMSP.member')"
+      admins:
+        rule: "OR('RegulatorMSP.admin')"
+
+organizations:
+  - name: ManufacturerOrg
+    mspid: ManufacturerMSP
+    peers:
+      - peer0.manufacturer.pharma.com
+      - peer1.manufacturer.pharma.com
+
+  - name: DistributorOrg
+    mspid: DistributorMSP
+    peers:
+      - peer0.distributor.pharma.com
+
+  - name: RegulatorOrg
+    mspid: RegulatorMSP
+    peers:
+      - peer0.regulator.pharma.com
+
+peers:
+  - name: peer0.manufacturer.pharma.com
+    url: grpcs://peer0.manufacturer.pharma.com:7051
+    tlsCACerts:
+      path: /etc/hyperledger/crypto/peerOrganizations/manufacturer.pharma.com/tlsca/tlsca.manufacturer.pharma.com-cert.pem
+
+  - name: peer0.distributor.pharma.com
+    url: grpcs://peer0.distributor.pharma.com:7051
+    tlsCACerts:
+      path: /etc/hyperledger/crypto/peerOrganizations/distributor.pharma.com/tlsca/tlsca.distributor.pharma.com-cert.pem
+
+  - name: peer0.regulator.pharma.com
+    url: grpcs://peer0.regulator.pharma.com:7051
+    tlsCACerts:
+      path: /etc/hyperledger/crypto/peerOrganizations/regulator.pharma.com/tlsca/tlsca.regulator.pharma.com-cert.pem
+
+orderers:
+  - name: orderer.pharma.com
+    url: grpcs://orderer.pharma.com:7050
+    tlsCACerts:
+      path: /etc/hyperledger/crypto/ordererOrganizations/pharma.com/tlsca/tlsca.pharma.com-cert.pem
+
+chaincode:
+  name: pharma-chain
+  version: 1.4
+  endorsementPolicy:
+    identities:
+      - role: { name: "member", mspId: "ManufacturerMSP" }
+      - role: { name: "member", mspId: "DistributorMSP" }
+    policy: 2-of
